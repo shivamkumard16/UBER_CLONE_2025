@@ -2,52 +2,50 @@ const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 
-const userScahema = new mongoose.model({
+const userSchema = new mongoose.Schema({
     fullname: {
         firstname: {
             type: String,
-            reuired: true,
-            minlength: [3, "First length must be at least 3 characters long"]
-        }
-        ,
+            required: true,  // Corrected spelling of 'required'
+            minlength: [3, "First name must be at least 3 characters long"]
+        },
         lastname: {
             type: String,
-            minlength: [3, "First length must be at least 3 characters long"]
+            minlength: [3, "Last name must be at least 3 characters long"]
         }
     },
     email: {
         type: String,
-        reuired: true,
+        required: true,  // Corrected spelling of 'required'
         unique: true,
-        minlength: [5, "First length must be at least 5 characters long"]
-
+        minlength: [5, "Email must be at least 5 characters long"]
     },
     password: {
         type: String,
-        reuired: true,
+        required: true,  // Corrected spelling of 'required'
         select: false
     },
     socketId: {
         type: String
     }
-
 });
 
-
-userScahema.methods.generateAuthToken = function () {
+// Instance method to generate auth token
+userSchema.methods.generateAuthToken = function () {
     const token = jwt.sign({ _id: this._id }, process.env.JWT_SECRET);
     return token;
 }
 
-userScahema.methods.comparePassword = async (password) => {
-    return await bcrypt.compare(password, this.password)
+// Instance method to compare passwords
+userSchema.methods.comparePassword = async function (password) {  // Changed to regular function
+    return await bcrypt.compare(password, this.password);
 }
 
-
-userScahema.statics.hashPassword=async(password)=>{
-  return await bcrypt.hash(password,10);
+// Static method to hash password
+userSchema.statics.hashPassword = async function (password) {  // Corrected to static method
+    return await bcrypt.hash(password, 10);
 }
 
-const userModel = mongoose.model('User',userScahema);
+const userModel = mongoose.model('User', userSchema);
 
-module.exports={userModel};
+module.exports = { userModel };
