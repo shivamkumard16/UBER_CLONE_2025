@@ -32,12 +32,15 @@ const userSchema = new mongoose.Schema({
 
 // Instance method to generate auth token
 userSchema.methods.generateAuthToken = function () {
+    // console.log(`instance based function generateAuthToken ke ander this -----= ${JSON.stringify(this.toObject())}\n\n`)
+
     const token = jwt.sign({ _id: this._id }, process.env.JWT_SECRET);
     return token;
 }
 
 // Instance method to compare passwords
 userSchema.methods.comparePassword = async function (password) {  // Changed to regular function
+    // console.log(`instance based function comparePassword ke ander this = ${this.fullname}\n\n`)
     return await bcrypt.compare(password, this.password);
 }
 

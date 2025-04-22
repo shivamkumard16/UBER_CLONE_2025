@@ -101,3 +101,93 @@ The request body must be JSON and include:
 - The returned JWT token can be used for authenticated requests.
 
 ---
+
+## User Login Endpoint
+
+### Endpoint
+
+`POST /users/login`
+
+### Description
+
+Authenticates a user using their email and password. If the credentials are valid, returns a JWT token and user details.
+
+### Request Body
+
+The request body must be JSON and include:
+
+- `email` (string, required): The user's registered email address.
+- `password` (string, required): The user's password (minimum 6 characters).
+
+#### Example
+
+```json
+{
+  "email": "john.doe@example.com",
+  "password": "securePassword123"
+}
+```
+
+### Validation
+
+- `email` must be a valid email.
+- `password` must be at least 6 characters.
+
+### Responses
+
+#### Success
+
+- **Status:** `200 OK`
+- **Body:**
+  ```json
+  {
+    "token": "jwt_token_string",
+    "user": {
+      "_id": "user_id",
+      "fullname": {
+        "firstname": "John",
+        "lastname": "Doe"
+      },
+      "email": "john.doe@example.com"
+    }
+  }
+  ```
+
+#### Validation Error
+
+- **Status:** `400 Bad Request`
+- **Body:**
+  ```json
+  {
+    "errors": [
+      {
+        "msg": "Invalid Email",
+        "param": "email",
+        "location": "body"
+      },
+      {
+        "msg": "password is too short, password must be 6 or more  than 6 character long.",
+        "param": "password",
+        "location": "body"
+      }
+    ]
+  }
+  ```
+
+#### Invalid Credentials
+
+- **Status:** `401 Unauthorized`
+- **Body:**
+  ```json
+  {
+    "message": "Invalid email or password"
+  }
+  ```
+
+### Notes
+
+- The password is compared securely using bcrypt.
+- The returned JWT token can be used for authenticated requests.
+
+---
+
