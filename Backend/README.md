@@ -191,3 +191,84 @@ The request body must be JSON and include:
 
 ---
 
+## User Profile Endpoint
+
+### Endpoint
+
+`GET /users/profile`
+
+### Description
+
+Returns the authenticated user's profile information. This endpoint requires a valid JWT token to be sent in the request (usually as a cookie or Authorization header).
+
+### Authentication
+
+- Requires JWT authentication (token must be provided).
+
+### Responses
+
+#### Success
+
+- **Status:** `200 OK`
+- **Body:**
+  ```json
+  {
+    "_id": "user_id",
+    "fullname": {
+      "firstname": "John",
+      "lastname": "Doe"
+    },
+    "email": "john.doe@example.com"
+  }
+  ```
+
+#### Unauthorized
+
+- **Status:** `401 Unauthorized`
+- **Body:**
+  ```json
+  {
+    "message": "Authentication required"
+  }
+  ```
+
+---
+
+## User Logout Endpoint
+
+### Endpoint
+
+`GET /users/logout`
+
+### Description
+
+Logs out the authenticated user by blacklisting the current JWT token. Requires a valid JWT token to be sent in the request.
+
+### Authentication
+
+- Requires JWT authentication (token must be provided).
+
+### Responses
+
+#### Success
+
+- **Status:** `200 OK`
+- **Body:**
+  ```json
+  {
+    "message": "Logged out"
+  }
+  ```
+
+#### Unauthorized
+
+- **Status:** `401 Unauthorized`
+- **Body:**
+  ```json
+  {
+    "message": "Authentication required"
+  }
+  ```
+
+---
+
