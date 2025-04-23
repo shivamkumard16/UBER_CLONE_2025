@@ -272,3 +272,33 @@ Logs out the authenticated user by blacklisting the current JWT token. Requires 
 
 ---
 
+## Blacklisted Tokens (Logout Security)
+
+### Description
+
+To enhance security, the backend uses a blacklist database collection to store JWT tokens that have been invalidated (for example, after a user logs out). This prevents the reuse of tokens after logout, even if the token is still within its expiry period.
+
+### How It Works
+
+- When a user logs out, their JWT token is added to the `BlacklistToken` collection in the database.
+- Each blacklisted token document contains:
+  - `token`: The JWT token string (unique and required).
+  - `createdAt`: The timestamp when the token was blacklisted.
+- The `createdAt` field is set to expire after 24 hours (86400 seconds), automatically removing the token from the database after its validity period.
+
+### Example Document
+
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "createdAt": "2024-04-23T12:34:56.789Z"
+}
+```
+
+### Security Note
+
+- Every authenticated request checks if the provided JWT token is present in the blacklist. If it is, access is denied.
+- This mechanism ensures that logging out immediately invalidates the token, even if it has not yet expired.
+
+---
+
