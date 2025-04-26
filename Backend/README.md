@@ -302,37 +302,29 @@ To enhance security, the backend uses a blacklist database collection to store J
 
 ---
 
-## Captain Registration Endpoint
+## Captain Routes Documentation
 
-### Endpoint
+### Registration
 
+**Endpoint:**  
 `POST /captains/register`
 
-### Description
+Registers a new captain (driver) with vehicle details. Validates all fields, hashes the password, and returns a JWT token with captain info.
 
-Registers a new captain (driver) in the system. The endpoint validates the input, hashes the password, stores the captain and their vehicle information in the database, and returns a JWT token along with the captain details.
+**Request Body:**
+- `fullname.firstname` (string, required): Captain's first name (min 3 chars)
+- `fullname.lastname` (string, optional): Captain's last name (min 3 chars if provided)
+- `email` (string, required): Unique, valid email
+- `password` (string, required): Min 6 chars
+- `vehicle.color` (string, required): Min 3 chars
+- `vehicle.plate` (string, required): Min 3 chars
+- `vehicle.capacity` (integer, required): Min 1
+- `vehicle.vehicleType` (string, required): One of `car`, `motorcycle`, `auto`
 
-### Request Body
-
-The request body must be JSON and include:
-
-- `fullname.firstname` (string, required): Captain's first name (minimum 3 characters).
-- `fullname.lastname` (string, optional): Captain's last name (minimum 3 characters if provided).
-- `email` (string, required): Valid and unique email address.
-- `password` (string, required): Password (minimum 6 characters).
-- `vehicle.color` (string, required): Vehicle color (minimum 3 characters).
-- `vehicle.plate` (string, required): Vehicle plate (minimum 3 characters).
-- `vehicle.capacity` (integer, required): Vehicle capacity (minimum 1).
-- `vehicle.vehicleType` (string, required): Must be one of: `car`, `motorcycle`, `auto`.
-
-#### Example
-
+**Example:**
 ```json
 {
-  "fullname": {
-    "firstname": "Alex",
-    "lastname": "Rider"
-  },
+  "fullname": { "firstname": "Alex", "lastname": "Rider" },
   "email": "alex.rider@example.com",
   "password": "captainPass123",
   "vehicle": {
@@ -344,113 +336,148 @@ The request body must be JSON and include:
 }
 ```
 
-### Validation
-
-- `email` must be a valid email.
-- `fullname.firstname` must be at least 3 characters.
-- `password` must be at least 6 characters.
-- `vehicle.color` must be at least 3 characters.
-- `vehicle.plate` must be at least 3 characters.
-- `vehicle.capacity` must be at least 1.
-- `vehicle.vehicleType` must be one of: `car`, `motorcycle`, `auto`.
-
-### Responses
-
-#### Success
-
-- **Status:** `201 Created`
-- **Body:**
-  ```json
-  {
-    "token": "jwt_token_string",
-    "captain": {
-      "_id": "captain_id",
-      "fullname": {
-        "firstname": "Alex",
-        "lastname": "Rider"
-      },
-      "email": "alex.rider@example.com",
-      "vehicle": {
-        "color": "Red",
-        "plate": "XYZ1234",
-        "capacity": 4,
-        "vehicleType": "car"
-      }
+**Success Response:**  
+- `201 Created`
+```json
+{
+  "token": "jwt_token_string",
+  "captain": {
+    "_id": "captain_id",
+    "fullname": { "firstname": "Alex", "lastname": "Rider" },
+    "email": "alex.rider@example.com",
+    "vehicle": {
+      "color": "Red",
+      "plate": "XYZ1234",
+      "capacity": 4,
+      "vehicleType": "car"
     }
   }
-  ```
+}
+```
 
-#### Validation Error
+**Validation Error:**  
+- `400 Bad Request`
+```json
+{
+  "errors": [
+    { "msg": "Invalid Email", "param": "email", "location": "body" },
+    { "msg": "name must be at least 3 characters long", "param": "fullname.firstname", "location": "body" },
+    { "msg": "Password must be at least 6 characters long", "param": "password", "location": "body" },
+    { "msg": "Vehicle color must be at least 3 characters long", "param": "vehicle.color", "location": "body" },
+    { "msg": "Vehicle plate must be at least 3 characters long", "param": "vehicle.plate", "location": "body" },
+    { "msg": "Vehicle capacity must be at least 1", "param": "vehicle.capacity", "location": "body" },
+    { "msg": "Vehicle type must be one of the following: car, motorcycle, auto", "param": "vehicle.vehicleType", "location": "body" }
+  ]
+}
+```
 
-- **Status:** `400 Bad Request`
-- **Body:**
-  ```json
-  {
-    "errors": [
-      {
-        "msg": "Invalid Email",
-        "param": "email",
-        "location": "body"
-      },
-      {
-        "msg": "name must be at least 3 characters long",
-        "param": "fullname.firstname",
-        "location": "body"
-      },
-      {
-        "msg": "Password must be at least 6 characters long",
-        "param": "password",
-        "location": "body"
-      },
-      {
-        "msg": "Vehicle color must be at least 3 characters long",
-        "param": "vehicle.color",
-        "location": "body"
-      },
-      {
-        "msg": "Vehicle plate must be at least 3 characters long",
-        "param": "vehicle.plate",
-        "location": "body"
-      },
-      {
-        "msg": "Vehicle capacity must be at least 1",
-        "param": "vehicle.capacity",
-        "location": "body"
-      },
-      {
-        "msg": "Vehicle type must be one of the following: car, motorcycle, auto",
-        "param": "vehicle.vehicleType",
-        "location": "body"
-      }
-    ]
-  }
-  ```
+**Already Exists:**  
+- `400 Bad Request`
+```json
+{ "message": "Captain already exist" }
+```
 
-#### Captain Already Exists
-
-- **Status:** `400 Bad Request`
-- **Body:**
-  ```json
-  {
-    "message": "Captain already exist"
-  }
-  ```
-
-#### Missing Required Fields
-
-- **Status:** `400 Bad Request`
-- **Body:**
-  ```json
-  {
-    "message": "All fields are required"
-  }
-  ```
-
-### Notes
-
-- The email must be unique.
-- Passwords are hashed before storage.
-- The returned JWT token can be used for authenticated requests as a captain.
+**Missing Fields:**  
+- `400 Bad Request`
+```json
+{ "message": "All fields are required" }
+```
 
 ---
+
+### Login
+
+**Endpoint:**  
+`POST /captains/login`
+
+Authenticates a captain using email and password. Returns JWT token and captain info.
+
+**Request Body:**
+- `email` (string, required)
+- `password` (string, required, min 6 chars)
+
+**Example:**
+```json
+{
+  "email": "alex.rider@example.com",
+  "password": "captainPass123"
+}
+```
+
+**Success Response:**  
+- `200 OK`
+```json
+{
+  "token": "jwt_token_string",
+  "captain": {
+    "_id": "captain_id",
+    "fullname": { "firstname": "Alex", "lastname": "Rider" },
+    "email": "alex.rider@example.com",
+    "vehicle": {
+      "color": "Red",
+      "plate": "XYZ1234",
+      "capacity": 4,
+      "vehicleType": "car"
+    }
+  }
+}
+```
+
+**Invalid Credentials:**  
+- `401 Unauthorized`
+```json
+{ "message": "Invalid email or password" }
+```
+
+---
+
+### Profile
+
+**Endpoint:**  
+`GET /captains/profile`
+
+Returns the authenticated captain's profile. Requires JWT token.
+
+**Success Response:**  
+- `200 OK`
+```json
+{
+  "_id": "captain_id",
+  "fullname": { "firstname": "Alex", "lastname": "Rider" },
+  "email": "alex.rider@example.com",
+  "vehicle": {
+    "color": "Red",
+    "plate": "XYZ1234",
+    "capacity": 4,
+    "vehicleType": "car"
+  }
+}
+```
+
+**Unauthorized:**  
+- `401 Unauthorized`
+```json
+{ "message": "Unauthorized" }
+```
+
+---
+
+### Logout
+
+**Endpoint:**  
+`GET /captains/logout`
+
+Logs out the captain by blacklisting the JWT token. Requires JWT token.
+
+**Success Response:**  
+- `200 OK`
+```json
+{ "message": "Logged out" }
+```
+
+**Unauthorized:**  
+- `401 Unauthorized`
+```json
+{ "message": "Unauthorized" }
+```
 
